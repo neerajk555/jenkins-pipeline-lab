@@ -1,3 +1,5 @@
+# Create build.gradle
+cat > build.gradle << 'EOF'
 plugins {
     id 'java'
     id 'application'
@@ -8,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    // JUnit 5 for testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -16,20 +19,42 @@ application {
     mainClass = 'HelloWorld'
 }
 
-test {
-    useJUnitPlatform()
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-// Custom task to display build info
-task buildInfo {
-    doLast {
-        println "Building Jenkins Pipeline Lab"
-        println "Java Version: ${System.getProperty('java.version')}"
-        println "Gradle Version: ${gradle.gradleVersion}"
-        println "Build Time: ${new Date()}"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+// Custom task for pipeline build information
+task buildInfo {
+    doLast {
+        println "=" * 50
+        println "Jenkins Pipeline Lab Build Information"  
+        println "=" * 50
+        println "Java Version: ${System.getProperty('java.version')}"
+        println "Gradle Version: ${gradle.gradleVersion}"
+        println "Project Version: 1.0.0"
+        println "Build Time: ${new Date()}"
+        println "Build User: ${System.getProperty('user.name')}"
+        println "=" * 50
+    }
+}
+
+// Task to verify build environment
+task checkEnvironment {
+    doLast {
+        println "Checking build environment..."
+        println "JAVA_HOME: ${System.getenv('JAVA_HOME') ?: 'Not set'}"
+        println "PATH contains java: ${System.getenv('PATH').contains('java')}"
+        println "Working Directory: ${System.getProperty('user.dir')}"
+    }
+}
+EOF
